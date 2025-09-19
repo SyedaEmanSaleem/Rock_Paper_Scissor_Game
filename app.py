@@ -12,17 +12,15 @@ model = tf.keras.models.load_model("best_model.h5")
 classes = ["Rock", "Paper", "Scissors"]
 
 
-# 🔹 Prediction function
 def predict(image):
     # Convert PIL image to array
     image = np.array(image)
 
     # Resize to training size
     image_resized = tf.image.resize(image, (300, 300))
-    image_resized = tf.cast(image_resized, tf.float32)
 
-    # Apply same preprocessing as training
-    image_resized = preprocess_input(image_resized)
+    # Rescale like in training
+    image_resized = image_resized / 255.0  
 
     # Add batch dimension
     image_resized = np.expand_dims(image_resized, axis=0)
@@ -31,9 +29,6 @@ def predict(image):
     pred = model.predict(image_resized)
     user_choice = classes[np.argmax(pred)]
 
-    # Debug: show probabilities
-    probs = {cls: float(p) for cls, p in zip(classes, pred[0])}
-
     # Computer random choice
     computer_choice = random.choice(classes)
 
@@ -41,13 +36,14 @@ def predict(image):
     if user_choice == computer_choice:
         result = "Draw!"
     elif (user_choice == "Rock" and computer_choice == "Scissors") or \
-         (user_choice == "Paper" and computer_choice == "Rock") or \
-         (user_choice == "Scissors" and computer_choice == "Paper"):
+            (user_choice == "Paper" and computer_choice == "Rock") or \
+            (user_choice == "Scissors" and computer_choice == "Paper"):
         result = "You Win!"
     else:
         result = "You Lose!"
 
-    return user_choice, computer_choice, result, probs
+    return user_choice, computer_choice, result
+
 
 
 # 🔹 Streamlit interface
