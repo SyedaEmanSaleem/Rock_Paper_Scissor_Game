@@ -7,7 +7,7 @@ from PIL import Image
 
 # 🔹 Load trained model
 model = tf.keras.models.load_model("best_model.h5")
-classes = ["Rock", "Paper", "Scissors"]
+classes = ["Paper", "Rock", "Scissors"]
 
 # 🔹 Prediction function
 def predict(image):
