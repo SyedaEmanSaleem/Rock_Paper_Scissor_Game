@@ -2,61 +2,76 @@ import streamlit as st
 import tensorflow as tf
 import numpy as np
 import random
+from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.resnet import preprocess_input
 from PIL import Image
 
-# 🔹 Load trained model
-model = tf.keras.models.load_model("best_model.h5")
-classes = ["Rock", "Paper", "Scissors"]
+# -----------------------------
+# CONFIG
+# -----------------------------
+IMG_SIZE = 300
+CLASS_NAMES = ["Rock", "Paper", "Scissors"]
 
+# -----------------------------
+# LOAD MODEL
+# -----------------------------
+@st.cache_resource
+def load_trained_model():
+    model = load_model("best_model.h5")
+    return model
 
-# 🔹 Prediction function
-def predict(image):
-    # Convert PIL image to array
-    image = np.array(image)
+model = load_trained_model()
 
-    # Resize to training size
-    image_resized = tf.image.resize(image, (300, 300))
-    image_resized = preprocess_input(image_resized)
-
-    # Add batch dimension
-    image_resized = np.expand_dims(image_resized, axis=0)
-
-    # Predict
-    pred = model.predict(image_resized)
-    user_choice = classes[np.argmax(pred)]
-
-    # Computer random choice
-    computer_choice = random.choice(classes)
-
-    # Decide result
+# -----------------------------
+# GAME LOGIC
+# -----------------------------
+def get_winner(user_choice, computer_choice):
     if user_choice == computer_choice:
-        result = "Draw!"
+        return "It's a Draw! 🤝"
     elif (user_choice == "Rock" and computer_choice == "Scissors") or \
-            (user_choice == "Paper" and computer_choice == "Rock") or \
-            (user_choice == "Scissors" and computer_choice == "Paper"):
-        result = "You Win!"
+         (user_choice == "Paper" and computer_choice == "Rock") or \
+         (user_choice == "Scissors" and computer_choice == "Paper"):
+        return "You Win! 🎉"
     else:
-        result = "You Lose!"
+        return "You Lose! 😢"
 
-    return user_choice, computer_choice, result
+# -----------------------------
+# STREAMLIT UI
+# -----------------------------
+st.set_page_config(page_title="Rock Paper Scissors Game", page_icon="✊✋✌️")
 
+st.title("✊✋✌️ Rock, Paper, Scissors Game")
+st.write("Upload an image of your hand gesture. The model will predict your move, the computer will make a move, and then we’ll see who wins!")
 
-# 🔹 Streamlit interface
-st.title("Rock Paper Scissors Game 🎮")
-st.write("Upload an image of your hand showing Rock ✊, Paper ✋, or Scissors ✌️.")
-
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
+uploaded_file = st.file_uploader("Upload an image...", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     # Open image
     image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Uploaded Image", use_container_width=True)
+    st.image(image, caption="Your Move", use_column_width=True)
 
-    # Predict
-    user_choice, computer_choice, result = predict(image)
+    # Preprocess
+    img_array = np.array(image)
+    img_resized = tf.image.resize(img_array, (IMG_SIZE, IMG_SIZE))
+    img_preprocessed = preprocess_input(img_resized)
+    img_expanded = np.expand_dims(img_preprocessed, axis=0)
+
+    # Prediction
+    preds = model.predict(img_expanded)
+    user_choice = CLASS_NAMES[np.argmax(preds)]
+    confidence = np.max(preds) * 100
+
+    # Computer's random choice
+    computer_choice = random.choice(CLASS_NAMES)
+
+    # Winner
+    result = get_winner(user_choice, computer_choice)
 
     # Show results
-    st.write(f"**Your Choice:** {user_choice}")
-    st.write(f"**Computer's Choice:** {computer_choice}")
-    st.write(f"**Result:** {result}")
+    st.subheader("Game Results")
+    st.write(f"**Your Move:** {user_choice} ({confidence:.2f}% confidence)")
+    st.write(f"**Computer’s Move:** {computer_choice}")
+    st.markdown(f"### 🎮 {result}")
+
+    # Confidence bar chart
+    st.bar_chart(dict(zip(CLASS_NAMES, preds[0])))
