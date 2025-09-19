@@ -52,7 +52,7 @@ uploaded_file = st.file_uploader("Upload an image...", type=["jpg", "jpeg", "png
 if uploaded_file is not None:
     # Open image
     image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Your Move", use_column_width=True)
+    st.image(image, caption="Your Move", use_container_width=True)  # fixed warning
 
     # Preprocess
     img_array = np.array(image)
@@ -62,7 +62,8 @@ if uploaded_file is not None:
 
     # Prediction
     preds = model.predict(img_expanded)
-    user_choice = CLASS_NAMES[np.argmax(preds)]
+    predicted_index = np.argmax(preds)
+    user_choice = CLASS_NAMES[predicted_index]
     confidence = np.max(preds) * 100
 
     # Computer's random choice
@@ -80,5 +81,8 @@ if uploaded_file is not None:
     # Confidence bar chart
     st.bar_chart(dict(zip(CLASS_NAMES, preds[0])))
 
-    # Debugging info (optional, you can remove later)
+    # Debugging info (optional, can remove later)
+    st.write("🔍 Debug Info:")
+    st.write("Class order:", CLASS_NAMES)
+    st.write("Predicted index:", predicted_index)
     st.write("Raw prediction scores:", preds[0])
