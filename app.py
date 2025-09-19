@@ -33,8 +33,8 @@ def predict(image):
     if user_choice == computer_choice:
         result = "Draw!"
     elif (user_choice == "Rock" and computer_choice == "Scissors") or \
-         (user_choice == "Paper" and computer_choice == "Rock") or \
-         (user_choice == "Scissors" and computer_choice == "Paper"):
+            (user_choice == "Paper" and computer_choice == "Rock") or \
+            (user_choice == "Scissors" and computer_choice == "Paper"):
         result = "You Win!"
     else:
         result = "You Lose!"
@@ -44,20 +44,14 @@ def predict(image):
 
 # 🔹 Streamlit interface
 st.title("Rock Paper Scissors Game 🎮")
-st.write("Upload an image OR take a live photo of your hand showing Rock ✊, Paper ✋, or Scissors ✌️.")
+st.write("Upload an image of your hand showing Rock ✊, Paper ✋, or Scissors ✌️.")
 
-
-# Option 1: Upload an image
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
 
-image = None
 if uploaded_file is not None:
+    # Open image
     image = Image.open(uploaded_file).convert("RGB")
-elif camera_file is not None:
-    image = Image.open(camera_file).convert("RGB")
-
-if image is not None:
-    st.image(image, caption="Input Image", use_container_width=True)
+    st.image(image, caption="Uploaded Image", use_container_width=True)
 
     # Predict
     user_choice, computer_choice, result = predict(image)
