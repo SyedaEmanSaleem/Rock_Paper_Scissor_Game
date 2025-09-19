@@ -5,12 +5,16 @@ import random
 from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.resnet import preprocess_input
 from PIL import Image
+import tensorflow_datasets as tfds
 
 # -----------------------------
 # CONFIG
 # -----------------------------
 IMG_SIZE = 300
-CLASS_NAMES = ["Rock", "Paper", "Scissors"]
+
+# Load dataset info to get correct class names
+_, info = tfds.load("rock_paper_scissors", split=["train"], with_info=True)
+CLASS_NAMES = info.features["label"].names  # ['rock', 'paper', 'scissors']
 
 # -----------------------------
 # LOAD MODEL
@@ -28,9 +32,9 @@ model = load_trained_model()
 def get_winner(user_choice, computer_choice):
     if user_choice == computer_choice:
         return "It's a Draw! 🤝"
-    elif (user_choice == "Rock" and computer_choice == "Scissors") or \
-         (user_choice == "Paper" and computer_choice == "Rock") or \
-         (user_choice == "Scissors" and computer_choice == "Paper"):
+    elif (user_choice == "rock" and computer_choice == "scissors") or \
+         (user_choice == "paper" and computer_choice == "rock") or \
+         (user_choice == "scissors" and computer_choice == "paper"):
         return "You Win! 🎉"
     else:
         return "You Lose! 😢"
@@ -75,3 +79,6 @@ if uploaded_file is not None:
 
     # Confidence bar chart
     st.bar_chart(dict(zip(CLASS_NAMES, preds[0])))
+
+    # Debugging info (optional, you can remove later)
+    st.write("Raw prediction scores:", preds[0])
