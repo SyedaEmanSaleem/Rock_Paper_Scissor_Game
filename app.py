@@ -17,6 +17,11 @@ def predict(image):
 
     # Resize to training size
     image_resized = tf.image.resize(image, (300, 300))
+
+    # 🔹 Match training: convert to float32 before preprocess_input
+    image_resized = tf.cast(image_resized, tf.float32)
+
+    # Apply same preprocessing as training
     image_resized = preprocess_input(image_resized)
 
     # Add batch dimension
@@ -40,7 +45,6 @@ def predict(image):
         result = "You Lose!"
 
     return user_choice, computer_choice, result
-
 
 # 🔹 Streamlit interface
 st.title("Rock Paper Scissors Game 🎮")
