@@ -7,17 +7,18 @@ from PIL import Image
 
 # 🔹 Load trained model
 model = tf.keras.models.load_model("best_model.h5")
-classes = ["Paper", "Rock", "Scissors"]
+
+# ✅ Must match TFDS label order: 0=Rock, 1=Paper, 2=Scissors
+classes = ["Rock", "Paper", "Scissors"]
+
 
 # 🔹 Prediction function
 def predict(image):
-    # Convert PIL image to NumPy array
+    # Convert PIL image to array
     image = np.array(image)
 
     # Resize to training size
     image_resized = tf.image.resize(image, (300, 300))
-
-    # 🔹 Match training: cast to float32 before preprocess_input
     image_resized = tf.cast(image_resized, tf.float32)
 
     # Apply same preprocessing as training
@@ -29,6 +30,9 @@ def predict(image):
     # Predict
     pred = model.predict(image_resized)
     user_choice = classes[np.argmax(pred)]
+
+    # Debug: show probabilities
+    probs = {cls: float(p) for cls, p in zip(classes, pred[0])}
 
     # Computer random choice
     computer_choice = random.choice(classes)
@@ -43,12 +47,12 @@ def predict(image):
     else:
         result = "You Lose!"
 
-    return user_choice, computer_choice, result
+    return user_choice, computer_choice, result, probs
 
 
 # 🔹 Streamlit interface
 st.title("Rock Paper Scissors Game 🎮")
-st.write("Upload image of your hand showing Rock ✊, Paper ✋, or Scissors ✌️.")
+st.write("Upload an image of your hand showing Rock ✊, Paper ✋, or Scissors ✌️.")
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
 
@@ -58,9 +62,13 @@ if uploaded_file is not None:
     st.image(image, caption="Uploaded Image", use_container_width=True)
 
     # Predict
-    user_choice, computer_choice, result = predict(image)
+    user_choice, computer_choice, result, probs = predict(image)
 
     # Show results
     st.write(f"**Your Choice:** {user_choice}")
     st.write(f"**Computer's Choice:** {computer_choice}")
     st.write(f"**Result:** {result}")
+
+    # Debugging: show prediction probabilities
+    st.write("### Prediction Probabilities")
+    st.json(probs)
