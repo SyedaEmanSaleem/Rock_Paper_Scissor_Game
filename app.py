@@ -50,9 +50,6 @@ st.write("Upload an image OR take a live photo of your hand showing Rock ✊, Pa
 # Option 1: Upload an image
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
 
-# Option 2: Take a live photo
-camera_file = st.camera_input("Or take a live photo")
-
 image = None
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
