@@ -7,20 +7,17 @@ from PIL import Image
 
 # 🔹 Load trained model
 model = tf.keras.models.load_model("best_model.h5")
-
-# ✅ Must match TFDS label order: 0=Rock, 1=Paper, 2=Scissors
 classes = ["Rock", "Paper", "Scissors"]
 
 
+# 🔹 Prediction function
 def predict(image):
     # Convert PIL image to array
     image = np.array(image)
 
     # Resize to training size
     image_resized = tf.image.resize(image, (300, 300))
-
-    # Rescale like in training
-    image_resized = image_resized / 255.0  
+    image_resized = preprocess_input(image_resized)
 
     # Add batch dimension
     image_resized = np.expand_dims(image_resized, axis=0)
@@ -45,7 +42,6 @@ def predict(image):
     return user_choice, computer_choice, result
 
 
-
 # 🔹 Streamlit interface
 st.title("Rock Paper Scissors Game 🎮")
 st.write("Upload an image of your hand showing Rock ✊, Paper ✋, or Scissors ✌️.")
@@ -58,13 +54,9 @@ if uploaded_file is not None:
     st.image(image, caption="Uploaded Image", use_container_width=True)
 
     # Predict
-    user_choice, computer_choice, result, probs = predict(image)
+    user_choice, computer_choice, result = predict(image)
 
     # Show results
     st.write(f"**Your Choice:** {user_choice}")
     st.write(f"**Computer's Choice:** {computer_choice}")
     st.write(f"**Result:** {result}")
-
-    # Debugging: show prediction probabilities
-    st.write("### Prediction Probabilities")
-    st.json(probs)
