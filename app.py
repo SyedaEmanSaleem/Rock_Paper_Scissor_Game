@@ -48,7 +48,7 @@ def predict(image):
 
 # 🔹 Streamlit interface
 st.title("Rock Paper Scissors Game 🎮")
-st.write("Upload an image of your hand showing Rock ✊, Paper ✋, or Scissors ✌️.")
+st.write("Upload image of your hand showing Rock ✊, Paper ✋, or Scissors ✌️.")
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
 
